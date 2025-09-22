@@ -9,9 +9,6 @@ class SoldItem extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'item_id';
-    
-    public $incrementing = false;
 
     protected $fillable = [
         'user_id',
@@ -28,6 +25,6 @@ class SoldItem extends Model
 
     public function item()
     {
-        return $this->belongsTo('App\Models\Item');
+        return $this->belongsTo(Item::class, 'item_id');
     }
 }

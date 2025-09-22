@@ -8,6 +8,7 @@ use App\Models\Profile;
 use App\Models\User;
 use App\Models\Item;
 use App\Models\SoldItem;
+use App\Models\Transaction;
 use App\Http\Requests\ProfileRequest;
 use Illuminate\Support\Facades\Storage;
 
@@ -45,25 +46,43 @@ class UserController extends Controller
                 'postcode' => $request->postcode,
                 'address' => $request->address,
                 'building' => $request->building
-            ]);    
+            ]);
         }
 
         User::find(Auth::id())->update([
             'name' => $request->name
         ]);
-        
+
         return redirect('/');
     }
 
-    public function mypage(Request $request){
-        $user = User::find(Auth::id());
-        if ($request->page == 'buy'){
-            $items = SoldItem::where('user_id', $user->id)->get()->map(function ($sold_item) {
-                return $sold_item->item;
-            });         
-        }else {
-            $items = Item::where('user_id', $user->id)->get();
-        }
-        return view('mypage', compact('user', 'items'));
+    public function mypage(Request $request)
+{
+    $user = User::find(Auth::id());
+    $page = $request->page;
+
+    $items = collect();          // 初期化（出品 or 購入）
+    $transactions = collect();   // 初期化（取引中）
+
+    if ($page === 'buy') {
+        $items = SoldItem::where('user_id', $user->id)->get()->map(function ($sold_item) {
+            return $sold_item->item;
+        });
+    } elseif ($page === 'transactions') {
+        $transactions = Transaction::with(['product', 'messages' => function ($q) use ($user) {
+            $q->whereNull('read_at')
+            ->where('user_id', '!=', $user->id);
+        }])
+        ->where(function ($query) use ($user) {
+            $query->where('buyer_id', $user->id)
+                ->orWhere('seller_id', $user->id);
+        })
+        ->where('is_completed', false)
+        ->get();
+    } else {
+        $items = Item::where('user_id', $user->id)->get();
     }
+
+    return view('mypage', compact('user', 'items', 'transactions'));
+}
 }

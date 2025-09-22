@@ -29,3 +29,13 @@
 .items{
     margin-top: 30px;
 }
+
+.user__rating {
+    font-size: 18px;
+    color: #FFD700;
+    /* ゴールド */
+}
+
+.user__rating span {
+    color: #333;
+    /* テキスト部分は黒 */ }

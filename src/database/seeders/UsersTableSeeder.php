@@ -31,5 +31,31 @@ class UsersTableSeeder extends Seeder
             'password' => Hash::make('password'),
         ];
         User::create($param);
+
+        // ↓↓↓ ここから本番用ユーザーを追加 ↓↓↓
+
+        // CO01〜CO05出品用ユーザーA
+        User::create([
+            'name' => 'ユーザーA',
+            'email' => 'seller1@example.com',
+            'email_verified_at' => Carbon::now(),
+            'password' => Hash::make('password'),
+        ]);
+
+        // CO06〜CO10出品用ユーザーB
+        User::create([
+            'name' => 'ユーザーB',
+            'email' => 'seller2@example.com',
+            'email_verified_at' => Carbon::now(),
+            'password' => Hash::make('password'),
+        ]);
+
+        // 何も紐づけられていないユーザーC
+        User::create([
+            'name' => 'ユーザーC',
+            'email' => 'unused@example.com',
+            'email_verified_at' => Carbon::now(),
+            'password' => Hash::make('password'),
+        ]);
     }
 }

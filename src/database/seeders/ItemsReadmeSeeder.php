@@ -7,10 +7,10 @@ use App\Models\Condition;
 use App\Models\Item;
 use App\Models\Like;
 
-class ItemsTableSeeder extends Seeder
+class ItemsReadmeSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Run the database seeds for README data.
      *
      * @return void
      */
@@ -23,7 +23,7 @@ class ItemsTableSeeder extends Seeder
                 'brand'=> 'Rolax',
                 'description' => 'スタイリッシュなデザインのメンズ腕時計',
                 'img_url' => 'products/mens_clock.jpg',
-                'user_id' => 2,
+                'user_id' => 3, // ユーザーA
                 'condition_id' => Condition::$UNUSED,
             ],
             [
@@ -32,7 +32,7 @@ class ItemsTableSeeder extends Seeder
                 'brand' => '西芝',
                 'description' => '高速で信頼性の高いハードディスク',
                 'img_url' => 'products/hard_disk.jpg',
-                'user_id' => 2,
+                'user_id' => 3,
                 'condition_id' => Condition::$HARMLESS,
             ],
             [
@@ -41,7 +41,7 @@ class ItemsTableSeeder extends Seeder
                 'brand' => '',
                 'description' => '新鮮な玉ねぎ3束のセット',
                 'img_url' => 'products/onion.jpg',
-                'user_id' => 2,
+                'user_id' => 3,
                 'condition_id' => Condition::$HARMED,
             ],
             [
@@ -50,7 +50,7 @@ class ItemsTableSeeder extends Seeder
                 'brand' => '',
                 'description' => 'クラシックなデザインの革靴',
                 'img_url' => 'products/leather_shoes.jpg',
-                'user_id' => 2,
+                'user_id' => 3,
                 'condition_id' => Condition::$BAD_CONDITION,
             ],
             [
@@ -59,7 +59,7 @@ class ItemsTableSeeder extends Seeder
                 'brand' => '',
                 'description' => '高性能なノートパソコン',
                 'img_url' => 'products/laptop_PC.jpg',
-                'user_id' => 2,
+                'user_id' => 3,
                 'condition_id' => Condition::$UNUSED,
             ],
             [
@@ -68,7 +68,7 @@ class ItemsTableSeeder extends Seeder
                 'brand' => '',
                 'description' => '高音質のレコーディング用マイク',
                 'img_url' => 'products/mic.jpg',
-                'user_id' => 2,
+                'user_id' => 4, // ユーザーB
                 'condition_id' => Condition::$HARMLESS,
             ],
             [
@@ -77,7 +77,7 @@ class ItemsTableSeeder extends Seeder
                 'brand' => '',
                 'description' => 'おしゃれなショルダーバッグ',
                 'img_url' => 'products/shoulder_bag.jpg',
-                'user_id' => 1,
+                'user_id' => 4,
                 'condition_id' => Condition::$HARMED,
             ],
             [
@@ -86,7 +86,7 @@ class ItemsTableSeeder extends Seeder
                 'brand' => '',
                 'description' => '使いやすいタンブラー',
                 'img_url' => 'products/tumbler.jpg',
-                'user_id' => 1,
+                'user_id' => 4,
                 'condition_id' => Condition::$BAD_CONDITION,
             ],
             [
@@ -95,7 +95,7 @@ class ItemsTableSeeder extends Seeder
                 'brand' => 'Starbacks',
                 'description' => '手動のコーヒーミル',
                 'img_url' => 'products/coffer_mill.jpg',
-                'user_id' => 1,
+                'user_id' => 4,
                 'condition_id' => Condition::$UNUSED,
             ],
             [
@@ -104,7 +104,7 @@ class ItemsTableSeeder extends Seeder
                 'brand' => '',
                 'description' => '便利なメイクアップセット',
                 'img_url' => 'products/make_set.jpg',
-                'user_id' => 1,
+                'user_id' => 4,
                 'condition_id' => Condition::$HARMLESS,
             ],
         ];
@@ -113,13 +113,10 @@ class ItemsTableSeeder extends Seeder
             Item::create($param);
         }
 
-        Like::create([
-            'user_id' => 1,
-            'item_id' => 1,
-        ]);
-        Like::create([
-            'user_id' => 2,
-            'item_id' => 7,
-        ]);
+        // いいね登録（Likesテーブル）
+        Like::create(['user_id' => 3, 'item_id' => 1]);  // 腕時計にいいね
+        Like::create(['user_id' => 4, 'item_id' => 6]);  // マイクにいいね
+        Like::create(['user_id' => 3, 'item_id' => 10]); // メイクセットにいいね
+        Like::create(['user_id' => 4, 'item_id' => 2]);  // HDDにいいね
     }
 }

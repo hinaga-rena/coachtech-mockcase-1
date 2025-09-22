@@ -60,7 +60,7 @@ https://docs.stripe.com/payments/checkout?locale=ja-JP
 | --- | --- | --- | --- | --- | --- |
 | id | bigint | ◯ |  | ◯ |  |
 | user_id | bigint |  |  | ◯ | users(id) |
-| condition_id | bigint |  |  | ◯ | condtions(id) |
+| condition_id | bigint |  |  | ◯ | conditions(id) |
 | name | varchar(255) |  |  | ◯ |  |
 | price | int |  |  | ◯ |  |
 | brand | varchar(255) |  |  |  |  |
@@ -95,8 +95,8 @@ https://docs.stripe.com/payments/checkout?locale=ja-JP
 | sending_postcode | varchar(255) |  |  | ◯ |  |
 | sending_address | varchar(255) |  |  | ◯ |  |
 | sending_building | varchar(255) |  |  |  |  |
-| created_at | created_at |  |  |  |  |
-| updated_at | updated_at |  |  |  |  |
+| created_at | timestamp |  |  |  |  |
+| updated_at | timestamp |  |  |  |  |
 
 ### category_itemsテーブル
 | カラム名 | 型 | primary key | unique key | not null | foreign key |
@@ -122,18 +122,70 @@ https://docs.stripe.com/payments/checkout?locale=ja-JP
 | created_at | timestamp |  |  |  |  |
 | updated_at | timestamp |  |  |  |  |
 
+### transactionsテーブル
+| カラム名 | 型 | primary key | unique key | not null | foreign key |
+| --- | --- | --- | --- | --- | --- |
+| id | bigint | ◯ |  | ◯ |  |
+| buyer_id | bigint |  |  | ◯ | users(id) |
+| seller_id | bigint |  |  | ◯ | users(id) |
+| product_id | bigint |  |  | ◯ | items(id) |
+| is_completed | boolean |  |  | ◯ |  |
+| created_at | timestamp |  |  |  |  |
+| updated_at | timestamp |  |  |  |  |
+
+### messagesテーブル
+| カラム名 | 型 | primary key | unique key | not null | foreign key |
+| --- | --- | --- | --- | --- | --- |
+| id | bigint | ◯ |  | ◯ |  |
+| transaction_id | bigint |  |  | ◯ | transactions(id) |
+| user_id | bigint |  |  | ◯ | users(id) |
+| content | text |  |  | ◯ |  |
+| image_path | varchar(255) |  |  |  |  |
+| read_at | timestamp |  |  |  |  |
+| created_at | timestamp |  |  |  |  |
+| updated_at | timestamp |  |  |  |  |
+
+### evaluationsテーブル
+| カラム名 | 型 | primary key | unique key | not null | foreign key |
+| --- | --- | --- | --- | --- | --- |
+| id | bigint | ◯ |  | ◯ |  |
+| from_user_id | bigint |  |  | ◯ | users(id) |
+| to_user_id | bigint |  |  | ◯ | users(id) |
+| product_id | bigint |  |  | ◯ | items(id) |
+| rating | int |  |  | ◯ |  |
+| comment | text |  |  |  |  |
+| created_at | timestamp |  |  |  |  |
+| updated_at | timestamp |  |  |  |  |
+
 ## ER図
 ![alt](ER.png)
 
-## テストアカウント
-name: 一般ユーザ  
-email: general1@gmail.com  
-password: password  
--------------------------
-name: 一般ユーザ  
-email: general2@gmail.com  
-password: password  
--------------------------
+## テストアカウント一覧
+
+本アプリでは以下のテスト用アカウントを用意しています。  
+用途に応じてログインして動作確認を行ってください。
+
+### 通常ログイン用（一般ユーザー）
+- ユーザー1  
+  - email: general1@gmail.com  
+  - password: password  
+
+- ユーザー2  
+  - email: general2@gmail.com  
+  - password: password  
+
+### README確認用（ダミーデータ）
+- ユーザーA（出品者用）  
+  - email: seller1@example.com  
+  - password: password  
+
+- ユーザーB（購入者用）  
+  - email: general2@gmail.com  
+  - password: password  
+
+- ユーザーC（未使用アカウント）  
+  - email: unused@example.com  
+  - password: password  
 
 ## PHPUnitを利用したテストに関して
 以下のコマンド:  
@@ -148,8 +200,14 @@ docker-compose exec php bash
 php artisan migrate:fresh --env=testing
 ./vendor/bin/phpunit
 ```
-※.env.testingにもStripeのAPIキーを設定してください。  
+※.env.testingにもStripeのAPIキーを設定してください。 
 
-## 生徒様へ
-普段よりお世話になっております。  
-こちらの模範解答に関するご質問、またこちらに不備を見つけた、などの際は気兼ねなく申し付けください。
+## マイグレーション＆README用シーディング
+docker-compose exec php php artisan migrate:fresh
+docker-compose exec php php artisan db:seed --class=UsersTableSeeder
+docker-compose exec php php artisan db:seed --class=ProfilesTableSeeder
+docker-compose exec php php artisan db:seed --class=ConditionsTableSeeder
+docker-compose exec php php artisan db:seed --class=CategoriesTableSeeder
+docker-compose exec php php artisan db:seed --class=ItemsReadmeSeeder
+docker-compose exec php php artisan db:seed --class=CategoryItemsTableSeeder
+docker-compose exec php php artisan db:seed --class=TransactionsReadmeSeeder
