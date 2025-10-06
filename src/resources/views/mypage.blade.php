@@ -8,16 +8,16 @@
 @endsection
 
 @section('content')
-
 @include('components.header')
 
 <div class="container">
 
-{{-- ▼ ユーザー情報表示 --}}
+    {{-- ▼ ユーザー情報表示 --}}
     <div class="user">
         <div class="user__info">
             <div class="user__img">
                 @if (isset($user->profile->img_url))
+                    {{-- プロフィール画像は storage 側想定 --}}
                     <img class="user__icon" src="{{ \Storage::url($user->profile->img_url) }}" alt="">
                 @else
                     <img id="myImage" class="user__icon" src="{{ asset('img/icon.png') }}" alt="">
@@ -25,16 +25,12 @@
             </div>
             <p class="user__name">{{ $user->name }}</p>
 
-            {{-- 🔽 平均評価の表示 --}}
+            {{-- 平均評価 --}}
             @if ($user->average_rating)
                 <div class="user__rating">
                     <span>平均評価:</span>
                     @for ($i = 1; $i <= 5; $i++)
-                        @if ($i <= $user->average_rating)
-                            ★
-                        @else
-                            ☆
-                        @endif
+                        {{ $i <= $user->average_rating ? '★' : '☆' }}
                     @endfor
                     <span>({{ $user->average_rating }}/5)</span>
                 </div>
@@ -48,7 +44,6 @@
         </div>
     </div>
 
-
     {{-- ▼ タブ切り替え --}}
     <div class="border">
         <ul class="border__list">
@@ -60,15 +55,21 @@
 
     {{-- ▼ 商品表示エリア --}}
     <div class="items">
-        @if(request()->get('page') === 'transactions')
-            {{-- 🔽 取引中商品表示 --}}
+        @if (request()->get('page') === 'transactions')
+            {{-- 取引中商品表示 --}}
             @foreach ($transactions as $transaction)
+                @php
+                    $p = $transaction->product->img_url;
+                    $txImg = \Illuminate\Support\Str::startsWith($p, 'products/')
+                        ? asset($p)
+                        : \Storage::url($p);
+                @endphp
                 <div class="item" style="position: relative;">
                     <a href="{{ route('transactions.show', $transaction->id) }}">
                         <div class="item__img--container">
-                            <img src="{{ \Storage::url($transaction->product->img_url) }}" class="item__img" alt="商品画像">
+                            <img src="{{ $txImg }}" class="item__img" alt="商品画像">
                         </div>
-                        @if($transaction->messages->count() > 0)
+                        @if ($transaction->messages->count() > 0)
                             <span class="badge" style="
                                 position: absolute;
                                 top: 5px;
@@ -85,14 +86,19 @@
                     </a>
                 </div>
             @endforeach
-
         @else
-            {{-- 🔽 出品/購入商品表示（既存） --}}
+            {{-- 出品/購入商品表示 --}}
             @foreach ($items as $item)
+                @php
+                    $u = $item->img_url;
+                    $itemImg = \Illuminate\Support\Str::startsWith($u, 'products/')
+                        ? asset($u)
+                        : \Storage::url($u);
+                @endphp
                 <div class="item">
                     <a href="/item/{{ $item->id }}">
                         <div class="item__img--container {{ $item->sold() ? 'sold' : '' }}">
-                            <img src="{{ \Storage::url($item->img_url) }}" class="item__img" alt="商品画像">
+                            <img src="{{ $itemImg }}" class="item__img" alt="商品画像">
                         </div>
                         <p class="item__name">{{ $item->name }}</p>
                     </a>

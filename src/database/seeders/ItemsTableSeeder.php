@@ -113,6 +113,7 @@ class ItemsTableSeeder extends Seeder
             Item::create($param);
         }
 
+        // いいね登録
         Like::create([
             'user_id' => 1,
             'item_id' => 1,
