@@ -39,7 +39,16 @@
 
         {{-- 商品情報 --}}
         <div class="product__info">
-            <img src="{{ Storage::url($transaction->product->img_url) }}" alt="商品画像" class="product__image">
+            @if ($transaction->product->is_sold ?? false)
+                <div class="product__image--container sold">
+                    <img src="{{ asset($transaction->product->img_url) }}" alt="商品画像" class="product__image">
+                </div>
+            @else
+                <div class="product__image--container">
+                    <img src="{{ asset($transaction->product->img_url) }}" alt="商品画像" class="product__image">
+                </div>
+            @endif
+
             <div class="product__detail">
                 <h3>{{ $transaction->product->name }}</h3>
                 <p>¥{{ number_format($transaction->product->price) }}</p>

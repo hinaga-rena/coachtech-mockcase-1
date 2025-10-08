@@ -177,8 +177,8 @@ https://docs.stripe.com/payments/checkout?locale=ja-JP
 
 ## テストアカウント一覧
 
-本アプリでは以下のテスト用アカウントを用意しています。  
-用途に応じてログインして動作確認を行ってください。
+本アプリでは機能を追加するという想定ため2つのテスト用アカウントを用意しています。  
+README確認用にログインして追加に機能動作確認を行ってください。
 
 ### 通常ログイン用（一般ユーザー）
 - ユーザー1  
@@ -190,11 +190,11 @@ https://docs.stripe.com/payments/checkout?locale=ja-JP
   - password: password  
 
 ### README確認用（ダミーデータ）
-- ユーザーA（出品者用）  
+- ユーザーA
   - email: seller1@example.com  
   - password: password  
 
-- ユーザーB（購入者用）  
+- ユーザーB
   - email: general2@gmail.com  
   - password: password  
 
@@ -226,3 +226,14 @@ docker-compose exec php php artisan db:seed --class=CategoriesTableSeeder
 docker-compose exec php php artisan db:seed --class=ItemsReadmeSeeder
 docker-compose exec php php artisan db:seed --class=CategoryItemsTableSeeder
 docker-compose exec php php artisan db:seed --class=TransactionsReadmeSeeder
+
+### 💡 購入・取引動作確認について
+
+以下のデータをもとに動作確認が可能です。
+
+| 状態 | 商品ID | 備考 |
+|:--|:--|:--|
+| 出品中 | 1, 6 | `unused@example.com` でログインし購入テスト可能 |
+| 取引中 | 2, 7 | 「取引中の商品」タブから取引チャット画面へ遷移可 |
+| 取引完了 | 3, 4, 5, 8, 9, 10 | 「購入した商品」タブにのみ表示される |
+

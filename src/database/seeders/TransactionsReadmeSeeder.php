@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use App\Models\Transaction;
 use App\Models\SoldItem;
 use App\Models\Message;
@@ -13,119 +14,140 @@ class TransactionsReadmeSeeder extends Seeder
 {
     public function run()
     {
-        // ユーザー3＝東京（buyer/seller切替）、ユーザー4＝大阪
-        $tokyoUserId = 3;
-        $osakaUserId = 4;
+        // ▼ 商品IDごとの出品者（ItemsReadmeSeeder と一致）
+        //   1〜5: seller = 3, 6〜10: seller = 4
+        $sellerOf = function (int $productId): int {
+            return $productId <= 5 ? 3 : 4;
+        };
+        // ▼ デモ購入者：1〜5 は buyer=4、6〜10 は buyer=3
+        $buyerOf = function (int $productId): int {
+            return $productId <= 5 ? 4 : 3;
+        };
 
-        $tokyoAddr = [
-            'sending_postcode' => '1500001',
-            'sending_address'  => '東京都渋谷区神宮前1-1-1',
-            'sending_building' => 'ハピネスタワー301',
+        // ▼ 住所テンプレ（SoldItem 用）
+        $addr = [
+            3 => [ // ユーザー3（東京）
+                'sending_postcode' => '1500001',
+                'sending_address'  => '東京都渋谷区神宮前1-1-1',
+                'sending_building' => 'ハピネスタワー301',
+            ],
+            4 => [ // ユーザー4（大阪）
+                'sending_postcode' => '5300001',
+                'sending_address'  => '大阪府大阪市北区梅田1-1-1',
+                'sending_building' => 'スマイルビル502',
+            ],
         ];
-        $osakaAddr = [
-            'sending_postcode' => '5300001',
-            'sending_address'  => '大阪府大阪市北区梅田1-1-1',
-            'sending_building' => 'スマイルビル502',
-        ];
 
-        // -----------------------------
-        // ユーザー3が商品1〜5を購入（完了）
-        // -----------------------------
-        for ($pid = 1; $pid <= 5; $pid++) {
-            // 購入履歴
-            SoldItem::create([
-                'user_id'          => $tokyoUserId, // 購入者
-                'item_id'          => $pid,
-                'sending_postcode' => $tokyoAddr['sending_postcode'],
-                'sending_address'  => $tokyoAddr['sending_address'],
-                'sending_building' => $tokyoAddr['sending_building'],
-            ]);
+        // ▼ 今回触る商品ID
+        $targetProductIds = range(1, 10);
 
-            // 取引（完了）
-            $t = Transaction::create([
-                'buyer_id'     => $tokyoUserId,
-                'seller_id'    => $osakaUserId,
-                'product_id'   => $pid,
-                'is_completed' => true,
-            ]);
+        DB::transaction(function () use ($targetProductIds, $sellerOf, $buyerOf, $addr) {
 
-            // チャット（2通）
-            Message::create([
-                'user_id'        => $tokyoUserId,
-                'transaction_id' => $t->id,
-                'content'        => "商品{$pid}の購入手続き完了しました。よろしくお願いします！",
-                'created_at'     => Carbon::now()->subMinutes(10),
-            ]);
-            Message::create([
-                'user_id'        => $osakaUserId,
-                'transaction_id' => $t->id,
-                'content'        => "ご購入ありがとうございます。迅速に発送いたします！",
-                'created_at'     => Carbon::now()->subMinutes(5),
-            ]);
+            // ---- 既存データのクリーンアップ（対象商品に関係するもののみ） ----
+            // 取引IDを拾ってから関連メッセージ→取引→評価→購入履歴の順で削除
+            $txIds = Transaction::whereIn('product_id', $targetProductIds)->pluck('id');
 
-            // 相互評価
-            Evaluation::create([
-                'from_user_id' => $tokyoUserId,
-                'to_user_id'   => $osakaUserId,
-                'product_id'   => $pid,
-                'rating'       => 5,
-                'comment'      => 'とても丁寧な対応でした！',
-            ]);
-            Evaluation::create([
-                'from_user_id' => $osakaUserId,
-                'to_user_id'   => $tokyoUserId,
-                'product_id'   => $pid,
-                'rating'       => 5,
-                'comment'      => 'スムーズなお取引ありがとうございました！',
-            ]);
-        }
+            if ($txIds->isNotEmpty()) {
+                Message::whereIn('transaction_id', $txIds)->delete();
+            }
+            Evaluation::whereIn('product_id', $targetProductIds)->delete();
+            Transaction::whereIn('product_id', $targetProductIds)->delete();
+            SoldItem::whereIn('item_id', $targetProductIds)->delete();
 
-        // -----------------------------
-        // ユーザー4が商品6〜10を購入（完了）
-        // -----------------------------
-        for ($pid = 6; $pid <= 10; $pid++) {
-            SoldItem::create([
-                'user_id'          => $osakaUserId,
-                'item_id'          => $pid,
-                'sending_postcode' => $osakaAddr['sending_postcode'],
-                'sending_address'  => $osakaAddr['sending_address'],
-                'sending_building' => $osakaAddr['sending_building'],
-            ]);
+            // =======================
+            // 1,6: 出品中（何も作らない）
+            // =======================
+            // → 何も入れません。出品されたままの状態になります。
 
-            $t = Transaction::create([
-                'buyer_id'     => $osakaUserId,
-                'seller_id'    => $tokyoUserId,
-                'product_id'   => $pid,
-                'is_completed' => true,
-            ]);
+            // =======================
+            // 2,7: 取引中（未完了）
+            // =======================
+            foreach ([2, 7] as $pid) {
+                $sellerId = $sellerOf($pid);
+                $buyerId  = $buyerOf($pid);
 
-            Message::create([
-                'user_id'        => $osakaUserId,
-                'transaction_id' => $t->id,
-                'content'        => "商品{$pid}の購入が完了しました。発送お願いします！",
-                'created_at'     => Carbon::now()->subMinutes(9),
-            ]);
-            Message::create([
-                'user_id'        => $tokyoUserId,
-                'transaction_id' => $t->id,
-                'content'        => "ありがとうございます。すぐに発送手配いたします！",
-                'created_at'     => Carbon::now()->subMinutes(4),
-            ]);
+                // 未完了の取引だけ作成（購入履歴はまだ作らない）
+                $t = Transaction::create([
+                    'buyer_id'     => $buyerId,
+                    'seller_id'    => $sellerId,
+                    'product_id'   => $pid,
+                    'is_completed' => false,
+                ]);
 
-            Evaluation::create([
-                'from_user_id' => $osakaUserId,
-                'to_user_id'   => $tokyoUserId,
-                'product_id'   => $pid,
-                'rating'       => 5,
-                'comment'      => '説明どおりの良品でした！',
-            ]);
-            Evaluation::create([
-                'from_user_id' => $tokyoUserId,
-                'to_user_id'   => $osakaUserId,
-                'product_id'   => $pid,
-                'rating'       => 5,
-                'comment'      => 'ご連絡が早く安心して取引できました！',
-            ]);
-        }
+                // 簡単なチャット2通
+                Message::create([
+                    'user_id'        => $buyerId,
+                    'transaction_id' => $t->id,
+                    'content'        => "商品{$pid}の件、よろしくお願いします！",
+                    'created_at'     => Carbon::now()->subMinutes(8),
+                ]);
+                Message::create([
+                    'user_id'        => $sellerId,
+                    'transaction_id' => $t->id,
+                    'content'        => "ご連絡ありがとうございます。発送準備いたします！",
+                    'created_at'     => Carbon::now()->subMinutes(4),
+                ]);
+            }
+
+            // =========================================
+            // 3,4,5,8,9,10: 取引完了（購入履歴 + 完了取引）
+            // =========================================
+            foreach ([3, 4, 5, 8, 9, 10] as $pid) {
+                $sellerId = $sellerOf($pid);
+                $buyerId  = $buyerOf($pid);
+
+                // 購入履歴
+                SoldItem::create([
+                    'user_id'          => $buyerId,
+                    'item_id'          => $pid,
+                    'sending_postcode' => $addr[$buyerId]['sending_postcode'],
+                    'sending_address'  => $addr[$buyerId]['sending_address'],
+                    'sending_building' => $addr[$buyerId]['sending_building'],
+                ]);
+
+                // 完了取引
+                $t = Transaction::create([
+                    'buyer_id'     => $buyerId,
+                    'seller_id'    => $sellerId,
+                    'product_id'   => $pid,
+                    'is_completed' => true,
+                ]);
+
+                // チャット
+                Message::create([
+                    'user_id'        => $buyerId,
+                    'transaction_id' => $t->id,
+                    'content'        => "商品{$pid}の購入手続き完了しました。ありがとうございました！",
+                    'created_at'     => Carbon::now()->subMinutes(10),
+                ]);
+                Message::create([
+                    'user_id'        => $sellerId,
+                    'transaction_id' => $t->id,
+                    'content'        => "ご購入ありがとうございます。評価もよろしくお願いします！",
+                    'created_at'     => Carbon::now()->subMinutes(5),
+                ]);
+
+                // 相互評価（例：どちらも★5）
+                Evaluation::create([
+                    'from_user_id' => $buyerId,
+                    'to_user_id'   => $sellerId,
+                    'product_id'   => $pid,
+                    'rating'       => 5,
+                    'comment'      => '丁寧なご対応でした！',
+                ]);
+                Evaluation::create([
+                    'from_user_id' => $sellerId,
+                    'to_user_id'   => $buyerId,
+                    'product_id'   => $pid,
+                    'rating'       => 5,
+                    'comment'      => 'スムーズなお取引、ありがとうございました！',
+                ]);
+            }
+        });
+
+        // これで最終状態は：
+        // - 商品1,6 … 出品中（誰も購入していない）
+        // - 商品2,7 … 取引中（未完了）
+        // - 商品3,4,5,8,9,10 … 完了
     }
 }
