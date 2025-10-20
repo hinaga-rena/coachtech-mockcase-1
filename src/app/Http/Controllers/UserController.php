@@ -29,7 +29,7 @@ class UserController extends Controller
         }else{
             $img_url = '';
         }
-        
+
         $profile = Profile::where('user_id', Auth::id())->first();
         if ($profile){
             $profile->update([
@@ -57,32 +57,59 @@ class UserController extends Controller
     }
 
     public function mypage(Request $request)
-{
-    $user = User::find(Auth::id());
-    $page = $request->page;
+    {
+        $user = User::find(Auth::id());
+        $page = $request->page;
 
-    $items = collect();          // 初期化（出品 or 購入）
-    $transactions = collect();   // 初期化（取引中）
+        $items         = collect();   // 出品 or 購入
+        $transactions  = collect();   // 取引中
+        $unreadCount   = 0;           // タブ横の未読合計
 
-    if ($page === 'buy') {
-        $items = SoldItem::where('user_id', $user->id)->get()->map(function ($sold_item) {
-            return $sold_item->item;
-        });
-    } elseif ($page === 'transactions') {
-        $transactions = Transaction::with(['product', 'messages' => function ($q) use ($user) {
-            $q->whereNull('read_at')
-            ->where('user_id', '!=', $user->id);
-        }])
-        ->where(function ($query) use ($user) {
-            $query->where('buyer_id', $user->id)
+        // 自分が関係する未完了の取引（共通ベース）
+        $baseTx = Transaction::query()
+            ->where(function ($q) use ($user) {
+                $q->where('buyer_id',  $user->id)
                 ->orWhere('seller_id', $user->id);
-        })
-        ->where('is_completed', false)
-        ->get();
-    } else {
-        $items = Item::where('user_id', $user->id)->get();
-    }
+            })
+            ->where('is_completed', false);
 
-    return view('mypage', compact('user', 'items', 'transactions'));
-}
+        if ($page === 'buy') {
+            $items = SoldItem::where('user_id', $user->id)->get()->map->item;
+
+            // タブ用未読合計だけ取得
+            $unreadCount = (int) (clone $baseTx)
+                ->withCount(['messages as unread_count' => function ($q) use ($user) {
+                    $q->whereNull('read_at')->where('user_id', '!=', $user->id);
+                }])
+                ->get()
+                ->sum('unread_count');
+
+        } elseif ($page === 'transactions') {
+            // 新着メッセージ時刻で降順並び替え + 未読数も一緒に取得
+            $transactions = (clone $baseTx)
+                ->with('product')
+                ->withMax('messages', 'created_at') // messages_max_created_at が付与
+                ->withCount(['messages as unread_count' => function ($q) use ($user) {
+                    $q->whereNull('read_at')->where('user_id', '!=', $user->id);
+                }])
+                ->orderByDesc('messages_max_created_at')
+                ->get();
+
+            // タブ用未読合計（一覧の各取引の未読数合計）
+            $unreadCount = (int) $transactions->sum('unread_count');
+
+        } else { // 出品した商品
+            $items = Item::where('user_id', $user->id)->get();
+
+            // タブ用未読合計だけ取得
+            $unreadCount = (int) (clone $baseTx)
+                ->withCount(['messages as unread_count' => function ($q) use ($user) {
+                    $q->whereNull('read_at')->where('user_id', '!=', $user->id);
+                }])
+                ->get()
+                ->sum('unread_count');
+        }
+
+        return view('mypage', compact('user', 'items', 'transactions', 'unreadCount'));
+    }
 }

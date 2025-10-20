@@ -42,6 +42,14 @@ class Transaction extends Model
         return $this->hasMany(Message::class);
     }
 
+    // 未読数カウント用（相手からの未読）
+    public function unreadMessagesFor(int $userId)
+    {
+        return $this->hasMany(Message::class)
+            ->whereNull('read_at')
+            ->where('user_id', '!=', $userId);
+    }
+
     // この取引の商品に対する評価一覧（from_user_idやto_user_idでフィルター可能）
     public function evaluations()
     {

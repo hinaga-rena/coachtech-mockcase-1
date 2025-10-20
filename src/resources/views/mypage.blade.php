@@ -49,63 +49,66 @@
         <ul class="border__list">
             <li><a href="/mypage?page=sell">出品した商品</a></li>
             <li><a href="/mypage?page=buy">購入した商品</a></li>
-            <li><a href="/mypage?page=transactions">取引中の商品</a></li>
+            <li>
+                <a href="/mypage?page=transactions" class="mp-tab-link">
+                    取引中の商品
+                    @if($unreadCount > 0)
+                        <span class="mp-unread-badge">{{ $unreadCount }}</span>
+                    @endif
+                </a>
+            </li>
         </ul>
     </div>
 
     {{-- ▼ 商品表示エリア --}}
-    <div class="items">
-        @if (request()->get('page') === 'transactions')
-            {{-- 取引中商品表示 --}}
-            @foreach ($transactions as $transaction)
-                @php
-                    $p = $transaction->product->img_url;
-                    $txImg = \Illuminate\Support\Str::startsWith($p, 'products/')
-                        ? asset($p)
-                        : \Storage::url($p);
-                @endphp
-                <div class="item" style="position: relative;">
-                    <a href="{{ route('transactions.show', $transaction->id) }}">
-                        <div class="item__img--container">
-                            <img src="{{ $txImg }}" class="item__img" alt="商品画像">
-                        </div>
-                        @if ($transaction->messages->count() > 0)
-                            <span class="badge" style="
-                                position: absolute;
-                                top: 5px;
-                                left: 5px;
-                                background: red;
-                                color: white;
-                                border-radius: 50%;
-                                padding: 4px 7px;
-                                font-size: 12px;">
-                                {{ $transaction->messages->count() }}
-                            </span>
+<div class="items">
+    @if (request()->get('page') === 'transactions')
+        {{-- 取引中商品表示 --}}
+        @foreach ($transactions as $transaction)
+            @php
+                $p = $transaction->product->img_url;
+                $txImg = \Illuminate\Support\Str::startsWith($p, 'products/')
+                    ? asset($p)
+                    : \Storage::url($p);
+
+                // コントローラで withCount('unread_count') を付けている想定
+                $unread = $transaction->unread_count ?? $transaction->messages->count();
+            @endphp
+            <div class="item">
+                <a href="{{ route('transactions.show', $transaction->id) }}">
+                    <div class="item__img--container" style="position: relative;">
+                        <img src="{{ $txImg }}" class="item__img" alt="商品画像">
+
+                        {{-- ★ 赤丸バッジ（画像左上） --}}
+                        @if ($unread > 0)
+                            <span class="mp-badge">{{ $unread }}</span>
                         @endif
-                        <p class="item__name">{{ $transaction->product->name }}</p>
-                    </a>
-                </div>
-            @endforeach
-        @else
-            {{-- 出品/購入商品表示 --}}
-            @foreach ($items as $item)
-                @php
-                    $u = $item->img_url;
-                    $itemImg = \Illuminate\Support\Str::startsWith($u, 'products/')
-                        ? asset($u)
-                        : \Storage::url($u);
-                @endphp
-                <div class="item">
-                    <a href="/item/{{ $item->id }}">
-                        <div class="item__img--container {{ $item->sold() ? 'sold' : '' }}">
-                            <img src="{{ $itemImg }}" class="item__img" alt="商品画像">
-                        </div>
-                        <p class="item__name">{{ $item->name }}</p>
-                    </a>
-                </div>
-            @endforeach
-        @endif
-    </div>
+                    </div>
+                    <p class="item__name">{{ $transaction->product->name }}</p>
+                </a>
+            </div>
+        @endforeach
+    @else
+        {{-- 出品/購入商品表示 --}}
+        @foreach ($items as $item)
+            @php
+                $u = $item->img_url;
+                $itemImg = \Illuminate\Support\Str::startsWith($u, 'products/')
+                    ? asset($u)
+                    : \Storage::url($u);
+            @endphp
+            <div class="item">
+                <a href="/item/{{ $item->id }}">
+                    <div class="item__img--container {{ $item->sold() ? 'sold' : '' }}">
+                        <img src="{{ $itemImg }}" class="item__img" alt="商品画像">
+                    </div>
+                    <p class="item__name">{{ $item->name }}</p>
+                </a>
+            </div>
+        @endforeach
+    @endif
+</div>
+
 
 </div>
 @endsection

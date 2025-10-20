@@ -1,21 +1,20 @@
-.user{
+.user {
     display: flex;
     justify-content: space-around;
     align-items: center;
-
 }
 
-.user__info{
+.user__info {
     display: flex;
     align-items: center;
 }
 
-.user__name{
+.user__name {
     font-size: 20px;
     font-weight: bold;
 }
 
-.user__img{
+.user__img {
     width: 150px;
     height: 150px;
     margin-right: 60px;
@@ -26,16 +25,66 @@
     background-color: #d9d9d9;
 }
 
-.items{
+.items {
     margin-top: 30px;
 }
 
 .user__rating {
     font-size: 18px;
     color: #FFD700;
-    /* ゴールド */
+    /* 星はゴールド */
 }
 
 .user__rating span {
     color: #333;
-    /* テキスト部分は黒 */ }
+    /* テキストは黒 */
+}
+
+/* ▼ 各タブのリスト項目は相対位置（バッジ重ね用） */
+.border__list li {
+    position: relative;
+}
+
+/* ▼ 商品画像コンテナも相対位置（バッジ重ね用） */
+.item__img--container {
+    position: relative;
+}
+
+/* ▼ 商品画像左上の赤丸 */
+.mp-badge {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: red;
+    color: #fff;
+    border-radius: 50%;
+    padding: 4px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ▼ タブ横の赤丸 */
+.mp-tab-link {
+    position: relative;
+    display: inline-block;
+}
+
+.mp-unread-badge {
+    position: absolute;
+    top: -2px;
+    right: -30px;
+    background: red;
+    color: #fff;
+    border-radius: 50%;
+    padding: 4px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}

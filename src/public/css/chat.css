@@ -146,42 +146,82 @@
     margin-left: 8px;
 }
 
-/* チャット送信フォーム */
+/* ===============================
+    チャット送信フォーム（横並び＋右下固定）
+=============================== */
+
 .chat__form {
+    position: fixed;
+    bottom: 20px;
+    /* 画面下に固定 */
+    right: 0;
+    left: 200px;
+    /* サイドバー幅に合わせて調整 */
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 10px;
+    background: #fff;
+    padding: 10px 20px;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+    z-index: 100;
 }
 
+/* メッセージ入力欄 */
 .chat__form textarea {
-    height: 80px;
-    padding: 10px;
-    resize: none;
+    flex: 1;
+    height: 50px;
+    padding: 10px 14px;
     font-size: 14px;
     border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: none;
+}
+
+/* 画像追加ボタン（赤枠） */
+.chat__image-btn {
+    display: inline-block;
+    color: #e86b6b;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1.8px solid #e86b6b;
     border-radius: 6px;
-}
-
-.chat__form input[type="file"] {
-    font-size: 13px;
-}
-
-.chat__submit-btn {
-    align-self: flex-end;
-    background-color: #FF8B8B;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: 6px 12px;
     cursor: pointer;
+    background: #fff;
+    transition: all 0.25s ease;
 }
 
-.chat__submit-btn:hover {
-    background-color: #e66a6a;
+.chat__image-btn:hover {
+    background: #e86b6b;
+    color: #fff;
+}
+
+/* 送信ボタン（紙飛行機） */
+.chat__submit-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+}
+
+.chat__submit-icon img {
+    width: 30px;
+    height: 30px;
+    filter: brightness(0);
+    /* 黒色で表示 */
+    transition: transform 0.2s;
+}
+
+.chat__submit-icon:hover img {
+    transform: scale(1.15);
 }
 
 /* 評価モーダル */
-/* 背景 */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -195,10 +235,8 @@
     z-index: 1000;
 }
 
-/* モーダル本体 */
 .rating__modal {
     background-color: #fffde7;
-    /* 淡い黄色 */
     border: 1px solid #ddd;
     padding: 24px;
     border-radius: 10px;
@@ -208,12 +246,10 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* 星の並び */
 .rating__stars {
     display: flex;
     justify-content: center;
     flex-direction: row-reverse;
-    /* ← これで左から塗られる */
     gap: 5px;
     margin: 16px 0;
 }
@@ -229,17 +265,15 @@
     transition: color 0.2s;
 }
 
-/* 選択時の色付け */
 .rating__stars input[type="radio"]:checked~label,
 .rating__stars label:hover,
 .rating__stars label:hover~label {
     color: gold;
 }
 
-/* 送信ボタン */
 .btn--submit-rating {
     background-color: #FF8B8B;
-    color: white;
+    color: #fff;
     border: none;
     padding: 10px 20px;
     border-radius: 6px;
@@ -271,29 +305,32 @@
 
     .chat__messages {
         max-height: 300px;
-        /* 少し低めに */
     }
 }
 
 /* ===== スマホ対応 ===== */
 @media (max-width: 768px) {
-    .product__info {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .product__image {
-        width: 100%;
-        max-width: 200px;
-        height: auto;
-    }
-
-    .chat__content {
-        max-width: 90%;
-        font-size: 13px;
+    .chat__form {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 8px 10px;
+        gap: 8px;
     }
 
     .chat__form textarea {
-        height: 60px;
+        height: 45px;
+        font-size: 13px;
+    }
+
+    .chat__image-btn {
+        font-size: 13px;
+        padding: 5px 8px;
+    }
+
+    .chat__submit-icon img {
+        width: 26px;
+        height: 26px;
     }
 }
