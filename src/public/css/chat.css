@@ -1,41 +1,74 @@
+/* ========= ベース幅の定義（1か所で管理） ========= */
+:root {
+    --content-max: 1200px;
+    /* 中央カラムの最大幅（PC） */
+    --sidebar-w: 220px;
+    /* サイドバー幅 */
+    --page-pad: 16px;
+    /* 画面端の最小余白（安全マージン） */
+}
+
 /* 全体レイアウト */
 .transaction__container {
     display: flex;
-    max-width: 1000px;
-    margin: 40px auto;
+    align-items: flex-start;
     gap: 30px;
     font-family: 'Noto Sans JP', sans-serif;
+
+    max-width: var(--content-max);
+    margin: 40px auto;
+    /* 画面下まで伸ばす（ヘッダー分ざっくり差し引き） */
+    min-height: calc(100vh - 140px);
+    padding: 0 var(--page-pad);
 }
 
-/* サイドバー */
+/* ===== サイドバー（グレー帯） ===== */
 .sidebar {
-    width: 200px;
+    width: var(--sidebar-w);
+    background: #888;
+    /* グレー */
+    color: #fff;
+    padding: 18px 14px;
+    border-right: 1px solid #777;
+    align-self: stretch;
+    /* 縦に伸びる */
 }
 
 .sidebar h3 {
-    font-size: 16px;
-    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 14px;
+    color: #fff;
 }
 
 .sidebar ul {
     list-style: none;
+    margin: 0;
     padding: 0;
 }
 
 .sidebar li {
-    margin-bottom: 10px;
+    margin-bottom: 14px;
 }
 
 .sidebar a {
+    display: block;
+    background: #f6f6f6;
+    color: #111;
     text-decoration: none;
-    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 12px;
+    line-height: 1.2;
+    transition: background .15s, color .15s, border-color .15s;
 }
 
 .sidebar a:hover {
-    text-decoration: underline;
+    background: #fff;
+    border-color: #ccc;
 }
 
-/* メインコンテンツ */
+/* メイン */
 .chat__main {
     flex: 1;
 }
@@ -50,15 +83,15 @@
 
 .btn--complete {
     padding: 6px 12px;
-    background-color: #FF8B8B;
-    color: white;
+    background: #FF8B8B;
+    color: #fff;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 
 .btn--complete:hover {
-    background-color: #e66a6a;
+    background: #e66a6a;
 }
 
 /* 商品情報 */
@@ -70,7 +103,7 @@
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 6px;
-    background-color: #f9f9f9;
+    background: #f9f9f9;
 }
 
 .product__image {
@@ -91,15 +124,17 @@
     color: #555;
 }
 
-/* チャットエリア */
+/* チャットエリア（フォームが被らない余白を確保） */
 .chat__messages {
     max-height: 400px;
     overflow-y: auto;
     margin-bottom: 20px;
     border: 1px solid #ccc;
     padding: 16px;
+    padding-bottom: 120px;
+    /* ← 下部固定フォーム分の逃げ */
     border-radius: 8px;
-    background-color: #fff;
+    background: #fff;
 }
 
 .chat__message {
@@ -123,7 +158,7 @@
 .chat__content {
     display: inline-block;
     padding: 10px 14px;
-    background-color: #f0f0f0;
+    background: #f0f0f0;
     border-radius: 10px;
     max-width: 70%;
 }
@@ -147,28 +182,26 @@
 }
 
 /* ===============================
-    チャット送信フォーム（横並び＋右下固定）
-=============================== */
-
+     送信フォーム（横並び＋右下固定）
+     中央レイアウトに追従するよう左右を calc で算出
+  =============================== */
 .chat__form {
     position: fixed;
-    bottom: 20px;
-    /* 画面下に固定 */
-    right: 0;
-    left: 200px;
-    /* サイドバー幅に合わせて調整 */
+    bottom: 16px;
+    /* 画面の中央カラムに揃えて配置：左右の余白は “中央カラム外側の余白 + 安全余白” */
+    left: max(var(--page-pad), calc((100vw - var(--content-max))/2 + var(--sidebar-w) + var(--page-pad)));
+    right: max(var(--page-pad), calc((100vw - var(--content-max))/2 + var(--page-pad)));
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 10px;
     background: #fff;
-    padding: 10px 20px;
+    padding: 10px 16px;
     border-top: 1px solid #ddd;
-    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, .05);
     z-index: 100;
 }
 
-/* メッセージ入力欄 */
+/* テキストエリア */
 .chat__form textarea {
     flex: 1;
     height: 50px;
@@ -190,7 +223,7 @@
     padding: 6px 12px;
     cursor: pointer;
     background: #fff;
-    transition: all 0.25s ease;
+    transition: all .25s ease;
 }
 
 .chat__image-btn:hover {
@@ -198,7 +231,7 @@
     color: #fff;
 }
 
-/* 送信ボタン（紙飛行機） */
+/* 送信（紙飛行機） */
 .chat__submit-icon {
     background: none;
     border: none;
@@ -213,22 +246,18 @@
     width: 30px;
     height: 30px;
     filter: brightness(0);
-    /* 黒色で表示 */
-    transition: transform 0.2s;
+    transition: transform .2s;
 }
 
 .chat__submit-icon:hover img {
     transform: scale(1.15);
 }
 
-/* 評価モーダル */
+/* ===== 評価モーダル ===== */
 .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -236,14 +265,14 @@
 }
 
 .rating__modal {
-    background-color: #fffde7;
+    background: #fffde7;
     border: 1px solid #ddd;
     padding: 24px;
     border-radius: 10px;
     max-width: 400px;
     width: 90%;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .2);
 }
 
 .rating__stars {
@@ -262,7 +291,7 @@
     font-size: 32px;
     color: #ccc;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: color .2s;
 }
 
 .rating__stars input[type="radio"]:checked~label,
@@ -272,7 +301,7 @@
 }
 
 .btn--submit-rating {
-    background-color: #FF8B8B;
+    background: #FF8B8B;
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -283,40 +312,59 @@
 }
 
 .btn--submit-rating:hover {
-    background-color: #e66a6a;
+    background: #e66a6a;
 }
 
-/* ===== タブレット対応 ===== */
+/* ====== タブレット（～1024px） ====== */
 @media (max-width: 1024px) {
     .transaction__container {
         flex-direction: column;
         max-width: 100%;
-        padding: 0 16px;
+        padding: 0 var(--page-pad);
     }
 
     .sidebar {
         width: 100%;
         margin-bottom: 20px;
-    }
-
-    .chat__main {
-        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #777;
     }
 
     .chat__messages {
         max-height: 300px;
     }
-}
 
-/* ===== スマホ対応 ===== */
-@media (max-width: 768px) {
+    /* フォームは画面幅いっぱい */
     .chat__form {
-        position: fixed;
         left: 0;
         right: 0;
         bottom: 0;
-        padding: 8px 10px;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+    }
+}
+
+/* ====== スマホ（～768px） ====== */
+@media (max-width: 768px) {
+    .product__info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .product__image {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+    }
+
+    .chat__content {
+        max-width: 90%;
+        font-size: 13px;
+    }
+
+    .chat__form {
         gap: 8px;
+        padding: 8px 10px;
     }
 
     .chat__form textarea {
@@ -332,5 +380,4 @@
     .chat__submit-icon img {
         width: 26px;
         height: 26px;
-    }
-}
+    } }

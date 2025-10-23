@@ -23,6 +23,13 @@ class TransactionController extends Controller
             abort(403);
         }
 
+        // ✅ 相手からの未読のみ既読化（先に実行してから eager load）
+        $me = $user->id;
+        $transaction->messages()
+            ->whereNull('read_at')
+            ->where('user_id', '!=', $me)
+            ->update(['read_at' => now()]);
+
         // 関連の先読み（buyer/sellerも読んでおくとpartner参照が速い）
         $transaction->load([
             'product',
@@ -53,6 +60,7 @@ class TransactionController extends Controller
             })
             ->where('id', '!=', $transaction->id)
             ->with('product')
+            ->latest()
             ->get();
 
         return view('transactions.show', compact(

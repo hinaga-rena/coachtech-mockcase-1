@@ -68,8 +68,23 @@
 }
 
 @media (min-width: 768px) and (max-width: 850px) {
+
+    /* 2列に固定 */
+    .items {
+        gap: 24px 16px;
+        /* 少しだけ詰めると見栄えが良い */
+    }
+
+    .items .item {
+        flex: 0 1 calc(50% - 16px);
+        /* 2列レイアウトを安定 */
+    }
+
+    /* 画像枠は親幅いっぱいの正方形に（縦横比が崩れない） */
     .item__img--container {
-        width: 25vw;
-        height: 10em;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1;
+        /* ← これがポイント */
     }
 }

@@ -1,16 +1,27 @@
-*{
+* {
     box-sizing: border-box;
 }
 
-body{
-    width: 100vw;
+/* ✅ 横スクロール防止＆リセット */
+html,
+body {
+    margin: 0;
+    padding: 0;
 }
 
-img{
+body {
+    /* width は指定しない（100vw はスクロールバー分で溢れやすい） */
+    /* width: 100vw; ←削除 */
+    line-height: 1.5;
+}
+
+img {
     width: 100%;
+    display: block;
+    /* 画像の下のスキマ防止 */
 }
 
-button{
+button {
     background-color: transparent;
     border: none;
     cursor: pointer;
@@ -19,12 +30,13 @@ button{
     appearance: none;
 }
 
-select{
+select {
     border: none;
     outline: none;
 }
 
-header{
+/* ===== ヘッダー ===== */
+header {
     align-items: center;
     background-color: #000;
     color: #fff;
@@ -34,75 +46,90 @@ header{
     height: 60px;
     padding: 0 30px;
     position: sticky;
-    z-index: var(--mer-z-index-navigation-top);
-    top: 0px;
+    top: 0;
+    z-index: 1000;
+    /* ✅ 変数ではなく数値で */
 }
 
-.header__logo{
+.header__logo {
     width: 250px;
-    height: fit-content;
+    height: auto;
     vertical-align: middle;
 }
 
-.header_search{
-    display:flex;
-    height:100%;
-    padding:10px 0;
-}
-.header_search--input{
-    border:none;
-    padding:0 20px;
-    width:25vw;
+.header_search {
+    display: flex;
+    height: 100%;
+    padding: 10px 0;
 }
 
-.header_search--button{
-    display:none;
+.header_search--input {
+    border: none;
+    padding: 0 20px;
+    width: 25vw;
+    /* PC帯での比率 */
+    min-width: 180px;
+    /* せまい時の下限 */
+    max-width: 420px;
+    /* ひろい時の上限 */
 }
 
-.header__nav{
+.header_search--button {
+    display: none;
+}
+
+.header__nav {
     display: flex;
 }
 
-.header__nav ul{
+.header__nav ul {
     display: flex;
     align-items: center;
+    gap: 16px;
+    /* 余白を gap で */
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
-.header__nav li{
-    margin-right: 30px;
+.header__nav li {
+    /* margin-right: 30px; ← gap に置換済み */
 }
 
-.header__nav li:hover{
+.header__nav li:hover {
     font-weight: bold;
 }
 
-.header__logout{
+.header__logout {
     color: #fff;
     font-size: 16px;
 }
 
-.header__logout:hover{
+.header__logout:hover {
     font-weight: bold;
 }
 
-.header__btn{
+.header__btn {
     background-color: #fff;
     border-radius: 4px;
     color: #000;
     font-weight: bold;
-    padding: 10px 15px ;
+    padding: 10px 15px;
 }
 
-.header__btn:hover{
+.header__btn:hover {
     opacity: 0.8;
     transition: 0.3s;
 }
 
-.container{
-    padding: 5%;
+/* ===== レイアウト共通 ===== */
+.container {
+    padding: 40px 5%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.btn{
+.btn {
     display: flex;
     align-items: center;
     background-color: #ff333f;
@@ -111,21 +138,23 @@ header{
     font-weight: bold;
     justify-content: center;
     width: 450px;
+    max-width: 100%;
+    /* ✅ 画面幅に合わせて縮む */
     height: 45px;
 }
 
-.btn:hover{
+.btn:hover {
     opacity: 0.8;
     transition: 0.2s;
 }
 
-.btn--big{
+.btn--big {
     width: 100%;
     margin-top: 60px;
     font-size: 20px;
 }
 
-.btn2{
+.btn2 {
     border: 2px solid #FF5555;
     border-radius: 10px;
     color: #FF5555;
@@ -135,51 +164,87 @@ header{
     align-items: center;
 }
 
-.btn2:hover{
+.btn2:hover {
     cursor: pointer;
 }
 
-.btn2--input{
+.btn2--input {
     display: none;
 }
 
-.center{
-    width: 680px;
+.center {
+    max-width: 680px;
+    /* ✅ 可変に */
+    width: 100%;
     margin: 0 auto;
     padding: 50px 0;
 }
 
-.page__title{
-    font-size: 30px;
+.page__title {
+    font-size: clamp(22px, 2.2vw, 30px);
+    /* ✅ 画面幅で最適化 */
     text-align: center;
     margin-bottom: 60px;
 }
 
-.entry__name{
+.entry__name {
     display: block;
     font-size: 18px;
     font-weight: bold;
     margin: 30px 0 10px 0;
 }
 
-.input{
+.input {
     width: 100%;
     height: 45px;
     padding: 5px;
 }
 
-.form__error{
+.form__error {
     color: #ff333f;
     margin-top: 8px;
 }
 
-.disable{
+.disable {
     color: #666 !important;
     background-color: #CCC !important;
 }
 
+/* ===== タブレット帯（768–850px）調整 ===== */
 @media (min-width: 768px) and (max-width: 850px) {
     .header__logo {
-        width: 25vw;
+        width: 22vw;
+        /* 少し詰める */
+        max-width: 200px;
+    }
+
+    .header_search--input {
+        width: 30vw;
+        /* ロゴ縮めた分、入力少し伸ばす */
+        min-width: 160px;
+    }
+
+    .container {
+        padding: 32px 4%;
     }
 }
+
+/* ===== スマホ想定（ついでの保険） ===== */
+@media (max-width: 767px) {
+    header {
+        padding: 0 16px;
+    }
+
+    .header__logo {
+        width: 180px;
+    }
+
+    .header_search--input {
+        width: 50vw;
+        min-width: 140px;
+        padding: 0 12px;
+    }
+
+    .container {
+        padding: 28px 16px;
+    } }

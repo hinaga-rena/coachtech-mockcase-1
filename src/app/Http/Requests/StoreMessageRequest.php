@@ -7,11 +7,11 @@ use Illuminate\Foundation\Http\FormRequest;
 class StoreMessageRequest extends FormRequest
 {
     /**
-     * 認可の確認
+     * 認可
      */
     public function authorize(): bool
     {
-        // コントローラで当事者チェックしているので true にしてOK
+        // 関係者チェックはコントローラで行うので true でOK
         return true;
     }
 
@@ -22,7 +22,8 @@ class StoreMessageRequest extends FormRequest
     {
         return [
             'content' => ['required', 'string', 'max:400'],
-            'image'   => ['nullable', 'image', 'mimes:jpeg,png'],
+            // ← image ルールは外し、mimes だけにする（jpg も許可）
+            'image'   => ['nullable', 'mimes:jpg,jpeg,png'],
         ];
     }
 
@@ -39,7 +40,7 @@ class StoreMessageRequest extends FormRequest
     }
 
     /**
-     * 属性名（日本語化）
+     * 属性名
      */
     public function attributes(): array
     {

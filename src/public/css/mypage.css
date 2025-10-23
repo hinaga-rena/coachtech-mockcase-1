@@ -1,3 +1,6 @@
+/* ============ 共通（ベース） ============ */
+
+/* ユーザー行 */
 .user {
     display: flex;
     justify-content: space-around;
@@ -29,32 +32,108 @@
     margin-top: 30px;
 }
 
+/* 星評価 */
 .user__rating {
     font-size: 18px;
     color: #FFD700;
-    /* 星はゴールド */
 }
 
 .user__rating span {
     color: #333;
-    /* テキストは黒 */
 }
 
-/* ▼ 各タブのリスト項目は相対位置（バッジ重ね用） */
+/* タブ（赤丸を重ねやすいように） */
+.border {
+    margin-top: 50px;
+}
+
+.border__list {
+    border-bottom: 1px solid #5F5F5F;
+    display: flex;
+    flex-wrap: nowrap;
+}
+
 .border__list li {
+    padding: 20px 80px;
+    font-weight: bold;
     position: relative;
 }
 
-/* ▼ 商品画像コンテナも相対位置（バッジ重ね用） */
+.border__list li:first-child {
+    padding-left: 10%;
+}
+
+/* ====== 商品グリッド ====== */
+.items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 35px 16px;
+    /* 行 x 列のギャップ */
+}
+
+.items .item {
+    flex: 0 1 15em;
+    /* 15em を上限に折り返す */
+}
+
+/* 画像ボックス */
 .item__img--container {
     position: relative;
+    /* バッジを重ねる */
+    background-color: #d0d0d0;
+    border-radius: 5px;
+    width: 15em;
+    height: 15em;
+    /* 正方形 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* ▼ 商品画像左上の赤丸 */
+.item__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item__name {
+    margin-top: 10px;
+}
+
+/* 売り切れリボン */
+.sold {
+    position: relative;
+}
+
+.sold::before {
+    content: "";
+    top: 0;
+    left: 0;
+    border-bottom: 4em solid transparent;
+    border-left: 4em solid #c12748;
+    position: absolute;
+    z-index: 100;
+}
+
+.sold::after {
+    content: "Sold";
+    display: block;
+    top: 1em;
+    left: .2em;
+    transform: rotate(-45deg);
+    color: #fff;
+    position: absolute;
+    z-index: 101;
+}
+
+/* ====== バッジ（赤丸） ====== */
+
+/* 商品画像左上の赤丸 */
 .mp-badge {
     position: absolute;
-    top: 5px;
-    left: 5px;
+    top: 6px;
+    left: 6px;
     background: red;
     color: #fff;
     border-radius: 50%;
@@ -67,7 +146,7 @@
     justify-content: center;
 }
 
-/* ▼ タブ横の赤丸 */
+/* タブ横の赤丸：位置ズレが出にくいよう transform で微調整 */
 .mp-tab-link {
     position: relative;
     display: inline-block;
@@ -75,8 +154,10 @@
 
 .mp-unread-badge {
     position: absolute;
-    top: -2px;
-    right: -30px;
+    top: 0;
+    right: 0;
+    transform: translate(65%, -40%);
+    /* 文字の右上に重ねる */
     background: red;
     color: #fff;
     border-radius: 50%;
@@ -88,3 +169,67 @@
     align-items: center;
     justify-content: center;
 }
+
+/* ============ レスポンシブ ============ */
+
+/* ■ PC 帯（1400–1540px）：横詰まり防止の微調整 */
+@media (min-width:1400px) and (max-width:1540px) {
+    .items {
+        gap: 35px 20px;
+    }
+}
+
+/* ■ タブレット帯（768–850px） */
+@media (min-width:768px) and (max-width:850px) {
+
+    /* 2列にする：左右の余白を考慮して調整 */
+    .items .item {
+        flex: 0 1 calc(50% - 12px);
+    }
+
+    /* 画像枠は親幅いっぱいの正方形に */
+    .item__img--container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1/1;
+    }
+
+    /* タブの余白をやや圧縮 */
+    .border__list {
+        flex-wrap: wrap;
+    }
+
+    .border__list li {
+        padding: 12px 18px;
+    }
+
+    .border__list li:first-child {
+        padding-left: 0;
+    }
+
+    /* タブの赤丸を少し内側へ */
+    .mp-unread-badge {
+        transform: translate(50%, -35%);
+    }
+}
+
+/* ■ スマホ（参考：必要なら） */
+@media (max-width:767px) {
+    .items .item {
+        flex: 0 1 calc(50% - 10px);
+    }
+
+    /* 2列 */
+    .item__img--container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1/1;
+    }
+
+    .border__list li {
+        padding: 10px 14px;
+    }
+
+    .mp-unread-badge {
+        transform: translate(45%, -30%);
+    } }

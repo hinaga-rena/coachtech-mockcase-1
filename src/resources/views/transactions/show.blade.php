@@ -7,25 +7,24 @@
 @endsection
 
 @section('content')
-@include('components.header')
+<header class="chat-header">
+    <div class="chat-header__logo">
+        <a href="/"><img src="{{ asset('img/logo.png') }}" alt="ロゴ"></a>
+    </div>
+</header>
 
 <div class="transaction__container">
-
-    {{-- サイドバー（他の取引） --}}
+    {{-- サイドバー --}}
     <aside class="sidebar">
         <h3>その他の取引</h3>
         <ul>
             @foreach($otherTransactions as $t)
-                <li>
-                    <a href="{{ route('transactions.show', $t->id) }}">
-                        {{ $t->product->name }}
-                    </a>
-                </li>
+                <li><a href="{{ route('transactions.show', $t->id) }}">{{ $t->product->name }}</a></li>
             @endforeach
         </ul>
     </aside>
 
-    {{-- メインチャット画面 --}}
+    {{-- メイン --}}
     <main class="chat__main">
         <div class="chat__header">
             <h2>「{{ $partner->name }}」さんとの取引画面</h2>
@@ -44,7 +43,6 @@
                 ? asset($prodPath)
                 : \Storage::url($prodPath);
         @endphp
-
         <div class="product__info">
             <div class="product__image--container {{ ($transaction->product->sold() ?? false) ? 'sold' : '' }}">
                 <img src="{{ $productImg }}" alt="商品画像" class="product__image">
@@ -55,26 +53,24 @@
             </div>
         </div>
 
-        {{-- チャットメッセージ一覧 --}}
+        {{-- チャット一覧 --}}
         <div class="chat__messages">
             @foreach($transaction->messages as $message)
                 <div class="chat__message {{ $message->user_id === $user->id ? 'my-message' : 'other-message' }}">
                     <div class="chat__user">{{ $message->user->name }}</div>
                     <div class="chat__content">{{ $message->content }}</div>
-
                     @if($message->image_path)
                         <img src="{{ Storage::url($message->image_path) }}" alt="添付画像" class="chat__image">
                     @endif
 
                     @if($message->user_id === $user->id)
-                        <div class="chat__actions">
-                            <a href="{{ route('messages.edit', $message->id) }}">編集</a> |
-                            <form action="{{ route('messages.destroy', $message->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" onclick="return confirm('本当に削除しますか？')">削除</button>
-                            </form>
-                        </div>
+                    <div class="chat__actions">
+                        <a href="{{ route('messages.edit', $message->id) }}">編集</a> |
+                        <form action="{{ route('messages.destroy', $message->id) }}" method="POST" style="display:inline;">
+                            @csrf @method('DELETE')
+                            <button type="submit" onclick="return confirm('本当に削除しますか？')">削除</button>
+                        </form>
+                    </div>
                     @endif
                 </div>
             @endforeach
@@ -100,12 +96,12 @@
         </div>
         @endif
 
-        {{-- チャット送信フォーム --}}
+        {{-- 送信フォーム --}}
         <form id="chatForm" action="{{ route('messages.store', $transaction->id) }}" method="POST" enctype="multipart/form-data" class="chat__form">
             @csrf
 
-            {{-- ✅ 要件通りのエラーメッセージのみ表示 --}}
-            <div class="error-messages" style="color: red; margin-bottom: 10px;">
+            {{-- 要件通りのメッセージのみ表示 --}}
+            <div class="error-messages" style="color:red;margin-bottom:10px;">
                 @error('content')
                     @if($message === '本文を入力してください' || $message === '本文は400文字以内で入力してください')
                         <div>{{ $message }}</div>
@@ -118,23 +114,22 @@
                 @enderror
             </div>
 
-            {{-- ✅ 入力保持（old() + localStorage） --}}
+            {{-- 本文（入力保持あり） --}}
             <textarea id="chatContent" name="content" placeholder="取引メッセージを入力してください">{{ old('content') }}</textarea>
 
-            {{-- ✅ 画像追加（赤文字でクリックできる） --}}
+            {{-- 画像追加（※acceptを付けない → 何でも選べる → 送信時にサーバで弾く） --}}
             <label for="chatImage" class="chat__image-btn">画像を追加</label>
-            <input id="chatImage" type="file" name="image" accept=".png,.jpeg" style="display: none;">
+            <input id="chatImage" type="file" name="image" style="display:none;">
 
-            {{-- ✅ ボタン文言は「送信する」 --}}
-            {{-- ✅ 紙飛行機マーク送信ボタン --}}
-        <button type="submit" class="chat__submit-icon" title="送信">
-            <img src="{{ asset('img/send-icon.svg') }}" alt="送信" />
-        </button>
+            {{-- 送信（紙飛行機） --}}
+            <button type="submit" class="chat__submit-icon" title="送信">
+                <img src="{{ asset('img/send-icon.svg') }}" alt="送信" />
+            </button>
         </form>
     </main>
 </div>
 
-{{-- ✅ 入力保持スクリプト --}}
+{{-- ✅ 入力保持スクリプト（old() + localStorage） --}}
 <script>
 (function(){
     const txId = @json($transaction->id);
@@ -142,26 +137,17 @@
     const textarea = document.getElementById('chatContent');
     const form = document.getElementById('chatForm');
 
-    // old()がない場合のみ localStorage から復元
+    // old() が空なら localStorage から復元
     if (!textarea.value) {
         const draft = localStorage.getItem(key);
         if (draft) textarea.value = draft;
     }
-
-    // 入力時に保存
-    textarea.addEventListener('input', () => {
-        localStorage.setItem(key, textarea.value);
-    });
-
+    // 入力の都度保存
+    textarea.addEventListener('input', () => localStorage.setItem(key, textarea.value));
     // 送信時に削除
-    form.addEventListener('submit', () => {
-        localStorage.removeItem(key);
-    });
-
+    form.addEventListener('submit', () => localStorage.removeItem(key));
     // 成功時にも削除
-    @if (session('success'))
-        localStorage.removeItem(key);
-    @endif
+    @if (session('success')) localStorage.removeItem(key); @endif
 })();
 </script>
 @endsection
